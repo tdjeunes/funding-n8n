@@ -1,0 +1,106 @@
+{
+  "data": [
+    {
+      "updatedAt": "2026-05-30T15:15:39.478Z",
+      "createdAt": "2026-05-30T14:14:20.385Z",
+      "id": "F6b7oeMycY8I1zrj",
+      "name": "My workflow",
+      "active": false,
+      "isArchived": false,
+      "nodes": [
+        {
+          "parameters": {},
+          "type": "n8n-nodes-base.manualTrigger",
+          "typeVersion": 1,
+          "position": [
+            0,
+            0
+          ],
+          "id": "89d7bb41-9645-48c6-962f-9ee7bf5902f2",
+          "name": "When clicking ‘Execute workflow’"
+        },
+        {
+          "parameters": {
+            "jsCode": "const password = $env.MY_PASSWORD;\nreturn [{ json: { message: `Nice day, isn't it. Password: ${password}` } }];"
+          },
+          "type": "n8n-nodes-base.code",
+          "typeVersion": 2,
+          "position": [
+            208,
+            0
+          ],
+          "id": "2a18bb00-5274-4c1a-900b-0984c606ad90",
+          "name": "Code in JavaScript"
+        },
+        {
+          "parameters": {
+            "url": "https://www.googleapis.com/drive/v3/files?fields=files(id,name,mimeType)",
+            "authentication": "predefinedCredentialType",
+            "nodeCredentialType": "googleApi",
+            "sendQuery": true,
+            "queryParameters": {
+              "parameters": [
+                {
+                  "name": "fields",
+                  "value": "files(id,name)"
+                }
+              ]
+            },
+            "options": {}
+          },
+          "type": "n8n-nodes-base.httpRequest",
+          "typeVersion": 4.4,
+          "position": [
+            176,
+            208
+          ],
+          "id": "d3d3dab9-38df-45fb-9983-cc7b482dde62",
+          "name": "HTTP Request",
+          "credentials": {
+            "googleApi": {
+              "id": "wmIdujQJR9WJYpyh",
+              "name": "Google Service Account account"
+            }
+          }
+        }
+      ],
+      "connections": {
+        "When clicking ‘Execute workflow’": {
+          "main": [
+            [
+              {
+                "node": "Code in JavaScript",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        }
+      },
+      "settings": {
+        "executionOrder": "v1",
+        "binaryMode": "separate"
+      },
+      "staticData": null,
+      "meta": {
+        "templateCredsSetupCompleted": true
+      },
+      "pinData": {},
+      "versionId": "a445fda5-3611-462b-9182-7dcc6ba943f4",
+      "activeVersionId": null,
+      "triggerCount": 0,
+      "shared": [
+        {
+          "updatedAt": "2026-05-30T14:14:20.389Z",
+          "createdAt": "2026-05-30T14:14:20.389Z",
+          "role": "workflow:owner",
+          "workflowId": "F6b7oeMycY8I1zrj",
+          "projectId": "WTIwk2sZjQlNQovC"
+        }
+      ],
+      "activeVersion": null,
+      "tags": []
+    }
+  ],
+  "nextCursor": null
+}
