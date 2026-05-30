@@ -17,6 +17,7 @@ docker run -d \
   -v n8n_data:/home/node/.n8n \
   --env-file .env \
   -e N8N_BLOCK_ENV_ACCESS_IN_NODE=false \
+  -e NODE_FUNCTION_ALLOW_EXTERNAL=mammoth \
   --restart unless-stopped \
   n8n-custom
 

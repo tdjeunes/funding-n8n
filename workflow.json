@@ -1,7 +1,7 @@
 {
   "data": [
     {
-      "updatedAt": "2026-05-30T15:15:39.478Z",
+      "updatedAt": "2026-05-30T16:34:37.304Z",
       "createdAt": "2026-05-30T14:14:20.385Z",
       "id": "F6b7oeMycY8I1zrj",
       "name": "My workflow",
@@ -13,24 +13,11 @@
           "type": "n8n-nodes-base.manualTrigger",
           "typeVersion": 1,
           "position": [
-            0,
-            0
+            -320,
+            32
           ],
           "id": "89d7bb41-9645-48c6-962f-9ee7bf5902f2",
           "name": "When clicking ‘Execute workflow’"
-        },
-        {
-          "parameters": {
-            "jsCode": "const password = $env.MY_PASSWORD;\nreturn [{ json: { message: `Nice day, isn't it. Password: ${password}` } }];"
-          },
-          "type": "n8n-nodes-base.code",
-          "typeVersion": 2,
-          "position": [
-            208,
-            0
-          ],
-          "id": "2a18bb00-5274-4c1a-900b-0984c606ad90",
-          "name": "Code in JavaScript"
         },
         {
           "parameters": {
@@ -46,16 +33,70 @@
                 }
               ]
             },
+            "options": {
+              "response": {
+                "response": {
+                  "responseFormat": "file"
+                }
+              }
+            }
+          },
+          "type": "n8n-nodes-base.httpRequest",
+          "typeVersion": 4.4,
+          "position": [
+            -160,
+            32
+          ],
+          "id": "d3d3dab9-38df-45fb-9983-cc7b482dde62",
+          "name": "HTTP Request",
+          "credentials": {
+            "googleApi": {
+              "id": "wmIdujQJR9WJYpyh",
+              "name": "Google Service Account account"
+            }
+          }
+        },
+        {
+          "parameters": {
+            "jsCode": "const item = $input.all()[0];\nconst binaryKeys = Object.keys(item.binary ?? {});\nconst firstKey = binaryKeys[0];\nconst firstBinary = item.binary[firstKey];\n\nreturn [{\n  json: {\n    binaryKeys: binaryKeys.join(','),\n    mimeType: firstBinary?.mimeType,\n    fileSize: firstBinary?.data?.length\n  }\n}];"
+          },
+          "type": "n8n-nodes-base.code",
+          "typeVersion": 2,
+          "position": [
+            336,
+            32
+          ],
+          "id": "ab19be3f-a026-47fc-b3fa-d199ee5415dd",
+          "name": "Code in JavaScript1"
+        },
+        {
+          "parameters": {
+            "options": {}
+          },
+          "type": "n8n-nodes-base.splitInBatches",
+          "typeVersion": 3,
+          "position": [
+            16,
+            32
+          ],
+          "id": "8fec77e0-5f94-445b-b14d-c9f2e00003db",
+          "name": "Loop Over Items"
+        },
+        {
+          "parameters": {
+            "url": "=https://www.googleapis.com/drive/v3/files/{{ $json.id }}?alt=media",
+            "authentication": "predefinedCredentialType",
+            "nodeCredentialType": "googleApi",
             "options": {}
           },
           "type": "n8n-nodes-base.httpRequest",
           "typeVersion": 4.4,
           "position": [
             176,
-            208
+            48
           ],
-          "id": "d3d3dab9-38df-45fb-9983-cc7b482dde62",
-          "name": "HTTP Request",
+          "id": "72682579-85b8-4a32-ad6f-cb094460213f",
+          "name": "HTTP Request1",
           "credentials": {
             "googleApi": {
               "id": "wmIdujQJR9WJYpyh",
@@ -69,7 +110,47 @@
           "main": [
             [
               {
-                "node": "Code in JavaScript",
+                "node": "HTTP Request",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "HTTP Request": {
+          "main": [
+            [
+              {
+                "node": "Loop Over Items",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Loop Over Items": {
+          "main": [
+            [
+              {
+                "node": "HTTP Request1",
+                "type": "main",
+                "index": 0
+              }
+            ],
+            [
+              {
+                "node": "Loop Over Items",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "HTTP Request1": {
+          "main": [
+            [
+              {
+                "node": "Code in JavaScript1",
                 "type": "main",
                 "index": 0
               }
@@ -86,7 +167,7 @@
         "templateCredsSetupCompleted": true
       },
       "pinData": {},
-      "versionId": "a445fda5-3611-462b-9182-7dcc6ba943f4",
+      "versionId": "a9ae87b8-4a3a-4209-8118-7912e4af0371",
       "activeVersionId": null,
       "triggerCount": 0,
       "shared": [
