@@ -1,7 +1,7 @@
 {
   "data": [
     {
-      "updatedAt": "2026-05-30T16:34:37.304Z",
+      "updatedAt": "2026-05-30T17:21:35.421Z",
       "createdAt": "2026-05-30T14:14:20.385Z",
       "id": "F6b7oeMycY8I1zrj",
       "name": "My workflow",
@@ -18,43 +18,6 @@
           ],
           "id": "89d7bb41-9645-48c6-962f-9ee7bf5902f2",
           "name": "When clicking ‘Execute workflow’"
-        },
-        {
-          "parameters": {
-            "url": "https://www.googleapis.com/drive/v3/files?fields=files(id,name,mimeType)",
-            "authentication": "predefinedCredentialType",
-            "nodeCredentialType": "googleApi",
-            "sendQuery": true,
-            "queryParameters": {
-              "parameters": [
-                {
-                  "name": "fields",
-                  "value": "files(id,name)"
-                }
-              ]
-            },
-            "options": {
-              "response": {
-                "response": {
-                  "responseFormat": "file"
-                }
-              }
-            }
-          },
-          "type": "n8n-nodes-base.httpRequest",
-          "typeVersion": 4.4,
-          "position": [
-            -160,
-            32
-          ],
-          "id": "d3d3dab9-38df-45fb-9983-cc7b482dde62",
-          "name": "HTTP Request",
-          "credentials": {
-            "googleApi": {
-              "id": "wmIdujQJR9WJYpyh",
-              "name": "Google Service Account account"
-            }
-          }
         },
         {
           "parameters": {
@@ -103,29 +66,25 @@
               "name": "Google Service Account account"
             }
           }
+        },
+        {
+          "parameters": {
+            "jsCode": "const { subtle } = require('crypto').webcrypto;\n\n// ── CONFIG ──────────────────────────────────────────────\nconst ROOT_FOLDER_ID = $env.GOOGLE_PROJECT_FOLDER;\nconst serviceAccountEmail = $env.GOOGLE_SERVICE_ACCOUNT;\nconst privateKey = $env.GOOGLE_SERVICE_ACCOUNT_KEY.replace(/\\\\n/g, '\\n');\nconst SCOPES = 'https://www.googleapis.com/auth/drive.readonly';\n\n// ── GENERATE JWT ─────────────────────────────────────────\nfunction base64url(str) {\n  return btoa(str).replace(/\\+/g, '-').replace(/\\//g, '_').replace(/=+$/, '');\n}\nfunction base64urlFromUint8(bytes) {\n  let str = '';\n  for (const b of bytes) str += String.fromCharCode(b);\n  return base64url(str);\n}\n\nconst now = Math.floor(Date.now() / 1000);\nconst header = base64url(JSON.stringify({ alg: 'RS256', typ: 'JWT' }));\nconst claim  = base64url(JSON.stringify({\n  iss: serviceAccountEmail,\n  scope: SCOPES,\n  aud: 'https://oauth2.googleapis.com/token',\n  iat: now,\n  exp: now + 3600\n}));\nconst signingInput = `${header}.${claim}`;\n\nconst pemBody = privateKey.replace(/-----[^-]+-----/g, '').replace(/\\s/g, '');\nconst binaryDer = Uint8Array.from(atob(pemBody), c => c.charCodeAt(0));\nconst cryptoKey = await subtle.importKey(\n  'pkcs8', binaryDer.buffer,\n  { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },\n  false, ['sign']\n);\nconst signature = await subtle.sign(\n  'RSASSA-PKCS1-v1_5',\n  cryptoKey,\n  new TextEncoder().encode(signingInput)\n);\nconst jwt = `${signingInput}.${base64urlFromUint8(new Uint8Array(signature))}`;\n\n// ── EXCHANGE JWT FOR ACCESS TOKEN ────────────────────────\nconst tokenData = await this.helpers.httpRequest({\n  method: 'POST',\n  url: 'https://oauth2.googleapis.com/token',\n  headers: { 'Content-Type': 'application/x-www-form-urlencoded' },\n  body: `grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion=${jwt}`\n});\nconst access_token = tokenData.access_token;\n\n// ── RECURSIVE FOLDER WALK ────────────────────────────────\nasync function listRecursive(folderId, path) {\n  let files = [];\n  let pageToken = null;\n  do {\n    const query = `q=${encodeURIComponent(`'${folderId}' in parents and trashed = false`)}&fields=${encodeURIComponent('nextPageToken, files(id, name, mimeType)')}&pageSize=1000${pageToken ? `&pageToken=${encodeURIComponent(pageToken)}` : ''}`;\n\n    const data = await this.helpers.httpRequest({\n      method: 'GET',\n      url: `https://www.googleapis.com/drive/v3/files?${query}`,\n      headers: { Authorization: `Bearer ${access_token}` }\n    });\n    for (const file of data.files) {\n      const filePath = `${path}/${file.name}`;\n      if (file.mimeType === 'application/vnd.google-apps.folder') {\n        const children = await listRecursive(file.id, filePath);\n        files = files.concat(children);\n      } else {\n        files.push({\n          id: file.id,\n          name: file.name,\n          mimeType: file.mimeType,\n          path: filePath\n        });\n      }\n    }\n    pageToken = data.nextPageToken;\n  } while (pageToken);\n  return files;\n}\n\nconst allFiles = await listRecursive(ROOT_FOLDER_ID, '');\nreturn allFiles.map(f => ({ json: f }));"
+          },
+          "type": "n8n-nodes-base.code",
+          "typeVersion": 2,
+          "position": [
+            -160,
+            32
+          ],
+          "id": "66148e34-b811-4ce3-9e4c-d4124751a8ad",
+          "name": "Code in JavaScript"
         }
       ],
       "connections": {
         "When clicking ‘Execute workflow’": {
           "main": [
-            [
-              {
-                "node": "HTTP Request",
-                "type": "main",
-                "index": 0
-              }
-            ]
-          ]
-        },
-        "HTTP Request": {
-          "main": [
-            [
-              {
-                "node": "Loop Over Items",
-                "type": "main",
-                "index": 0
-              }
-            ]
+            []
           ]
         },
         "Loop Over Items": {
@@ -167,7 +126,7 @@
         "templateCredsSetupCompleted": true
       },
       "pinData": {},
-      "versionId": "a9ae87b8-4a3a-4209-8118-7912e4af0371",
+      "versionId": "ed7821e2-eaff-4abf-b180-0b113787c832",
       "activeVersionId": null,
       "triggerCount": 0,
       "shared": [
