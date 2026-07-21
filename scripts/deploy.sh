@@ -18,7 +18,7 @@ docker run -d \
   --env-file .env \
   -e N8N_BLOCK_ENV_ACCESS_IN_NODE=false \
   -e NODE_FUNCTION_ALLOW_EXTERNAL=mammoth \
-  -e NODE_FUNCTION_ALLOW_BUILTIN=crypto \
+  -e NODE_FUNCTION_ALLOW_BUILTIN=crypto,child_process,fs \
   --restart unless-stopped \
   n8n-custom
 
