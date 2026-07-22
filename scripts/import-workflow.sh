@@ -1,9 +1,5 @@
 #!/bin/bash
 source .env
-WORKFLOW=$(jq '.data[0] | {name, nodes, connections, staticData, pinData, settings: {executionOrder: .settings.executionOrder}}' ./workflow.json)
-WORKFLOW_ID=$(jq -r '.data[0].id' ./workflow.json)
-
-curl -X PATCH http://localhost:5678/api/v1/workflows/$WORKFLOW_ID \
-  -H "Content-Type: application/json" \
-  -H "X-N8N-API-KEY: $N8N_API_KEY" \
-  -d "$WORKFLOW"
+jq '.data' workflow.json > workflow_fixed.json
+docker cp workflow_fixed.json n8n:/tmp/workflow_fixed.json
+docker exec n8n n8n import:workflow --input=/tmp/workflow_fixed.json
