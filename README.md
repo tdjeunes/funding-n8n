@@ -16,6 +16,12 @@ Une installation locale n8n pour chercher du financement
 
 ## Au premier lancement
 
+* Si vous n'êtes pas sur un serveur sécuritaire, modifiez ./.env en y ajoutant:
+
+    N8N_SECURE_COOKIE=false
+
+puis refaites ./scripts/deploy.sh.
+
 * Créer un compte et vous rappeler du mot de passe.
 * http://localhost:5678/settings/api
 * Créer une clé API avec l'étiquette "import-export"
@@ -26,17 +32,17 @@ Une installation locale n8n pour chercher du financement
 
 Vous n'aurez plus à faire ces étapes tant que vous n'avez pas détruit vos données.
 
+Vous pouvez importer et exporter des workflow via ./scripts/import-workflow.sh et ./scripts/export-workflow.sh.
+
 ## Gestion de secrets
 
-Dans ./.env, mettez:
+La gestion de secrets se fait via des variables d'environnement dans ./.env, comme ceci:
 
-    MY_PASSWORD=princess123!
+    CECI_EST_UN_EXEMPLE_DE_SECRET=princess123!
 
 Ensuite
 
     ./scripts/deploy.sh
-
-Ensuite si votre code a besoin de secret, utilisez:
 
 ## Credentials
 
